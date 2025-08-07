@@ -108,7 +108,7 @@ def backend_factory(args):
         # Only for FasterWhisperASR and WhisperTimestampedASR
         size = args.model
         t = time.time()
-        logger.info(f"Loading Whisper {size} model for language {args.lan}...")
+        logger.info(f"Loading Whisper {size} model with language={args.lan}, device={args.device} and compute_type={args.compute_type}...")
         asr = asr_cls(
             modelsize=size,
             lan=args.lan,
