@@ -3,7 +3,11 @@ try:
 except ImportError:
     from .whisper_streaming_custom.whisper_online import backend_factory, warmup_asr
 from argparse import Namespace
+import gc
+import logging
+import torch
 
+logger = logging.getLogger(__name__)
 
 class TranscriptionEngine:
     _instance = None
@@ -94,4 +98,16 @@ class TranscriptionEngine:
         TranscriptionEngine._initialized = True
     
     def free(self):
-        self.asr.unload_model()
+        # TODO: proper cleanup
+        """
+        try:
+            # self.asr.model = None
+            # self.asr = None
+            # self.tokenizer = None
+            # self.diarization = None
+        except AttributeError:
+            logger.warning("Skipping free: no model loaded")
+            return
+        """
+        gc.collect()
+        torch.cuda.empty_cache()

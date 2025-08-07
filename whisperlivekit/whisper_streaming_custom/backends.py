@@ -52,11 +52,6 @@ class ASRBase:
 
     def load_model(self, modelsize, cache_dir, model_dir, device="auto", compute_type="auto"):
         raise NotImplementedError("must be implemented in the child class")
-    
-    def unload_model(self):
-        del self.model
-        gc.collect()
-        torch.cuda.empty_cache()
 
     def transcribe(self, audio, init_prompt=""):
         raise NotImplementedError("must be implemented in the child class")
