@@ -43,6 +43,8 @@ class TranscriptionEngine:
             "vad": True,
             "segmentation_model": "pyannote/segmentation-3.0",
             "embedding_model": "pyannote/embedding",
+            "device": "auto",
+            "compute_type": "auto",
             # simulstreaming params:
             "frame_threshold": 25,
             "beams": 1,

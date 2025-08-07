@@ -196,6 +196,8 @@ WhisperLiveKit offers extensive configuration options:
 | `--no-vad` | Disable Voice Activity Detection | `False` |
 | `--buffer_trimming` | Buffer trimming strategy (`sentence` or `segment`) | `segment` |
 | `--warmup-file` | Audio file path for model warmup | `jfk.wav` |
+| `--device` | Compute device (e.g. `cuda`) | `auto` |
+| `--compute_type` | Compute type (e.g. `float32`) | `auto` |
 | `--ssl-certfile` | Path to the SSL certificate file (for HTTPS support) | `None` |
 | `--ssl-keyfile` | Path to the SSL private key file (for HTTPS support) | `None` |
 | `--segmentation-model` | Hugging Face model ID for pyannote.audio segmentation model. [Available models](https://github.com/juanmc2005/diart/tree/main?tab=readme-ov-file#pre-trained-models) | `pyannote/segmentation-3.0` |

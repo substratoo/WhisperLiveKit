@@ -114,6 +114,8 @@ def backend_factory(args):
             lan=args.lan,
             cache_dir=getattr(args, 'model_cache_dir', None),
             model_dir=getattr(args, 'model_dir', None),
+            device=getattr(args, 'device', 'auto'),
+            compute_type=getattr(args, 'compute_type', 'auto')
         )
         e = time.time()
         logger.info(f"done. It took {round(e-t,2)} seconds.")
