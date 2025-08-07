@@ -92,3 +92,6 @@ class TranscriptionEngine:
             )
             
         TranscriptionEngine._initialized = True
+    
+    def free(self):
+        self.asr.unload_model()

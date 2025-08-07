@@ -56,6 +56,9 @@ class ASRBase:
     def unload_model(self):
         raise NotImplementedError("must be implemented in the child class")
 
+    def switch_model(self, modelsize, cache_dir, model_dir, device="auto", compute_type="auto"):
+        raise NotImplementedError("must be implemented in the child class")
+
     def transcribe(self, audio, init_prompt=""):
         raise NotImplementedError("must be implemented in the child class")
 
@@ -138,6 +141,10 @@ class FasterWhisperASR(ASRBase):
         del self.model
         gc.collect()
         torch.cuda.empty_cache()
+
+    def switch_model(self, modelsize=None, cache_dir=None, model_dir=None, device="auto", compute_type="auto"):
+        self.unload_model() # Unload old model to free memory
+        return self.load_model(modelsize, cache_dir, model_dir, device, compute_type)
 
     def transcribe(self, audio: np.ndarray, init_prompt: str = "") -> list:
         segments, info = self.model.transcribe(

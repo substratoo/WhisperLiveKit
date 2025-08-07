@@ -15,6 +15,12 @@
 
 Built on [WhisperStreaming](https://github.com/ufal/whisper_streaming) and [SimulStreaming](https://github.com/ufal/SimulStreaming), WhisperLiveKit provides real-time speech transcription in your browser, with a ready-to-use backend and a simple, customizable frontend. ✨
 
+### This Fork
+Aims to provide some small improvements on the wrapper functionality.
+- **More whisper arguments** - Adds `device` and `compute_type` arguments to the cli and TranscriptionEngine class
+- **Unloading models** - Supports unloading models from memory using `TranscriptionEngine.free`
+- 
+
 
 ### Key Features
 
