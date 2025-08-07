@@ -30,6 +30,12 @@ dependencies = [
     "websockets"
 ]
 
+[tool.poetry]
+name = "whisperlivekit"
+version = "0.2.4"
+authors = ["Quentin Fuxa"]
+description = "Real-time, Fully Local Whisper's Speech-to-Text and Speaker Diarization"
+
 [project.optional-dependencies]
 diarization = ["diart"]
 vac = ["torch"]
