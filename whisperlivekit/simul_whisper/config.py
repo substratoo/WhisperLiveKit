@@ -8,7 +8,7 @@ class SimulWhisperConfig:
     '''Options that are common for all simul policies that could be implemented in SimulWhisper.'''
     model_path: str
     language: str = field(default="zh")
-    nonspeech_prob: float = 1.0
+    nonspeech_prob: float = 0.5
     audio_min_len: float = 1.0
     decoder_type: Literal["greedy","beam"] = "greedy"
     beam_size: int = 5

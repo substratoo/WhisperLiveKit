@@ -1,4 +1,3 @@
-from .download_simulstreaming_backend import download_simulstreaming_backend
 from .audio_processor import AudioProcessor
 from .core import TranscriptionEngine
 from .parse_args import parse_args

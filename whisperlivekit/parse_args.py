@@ -242,6 +242,14 @@ def parse_args():
         dest="model_path",
         help="Direct path to the SimulStreaming Whisper .pt model file. Overrides --model for SimulStreaming backend.",
     )
+    
+    simulstreaming_group.add_argument(
+        "--preloaded_model_count",
+        type=int,
+        default=1,
+        dest="preloaded_model_count",
+        help="Optional. Number of models to preload in memory to speed up loading (set up to the expected number of concurrent instances).",
+    )
 
     args = parser.parse_args()
     

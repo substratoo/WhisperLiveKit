@@ -6,10 +6,9 @@ import logging
 import traceback
 from datetime import timedelta
 from whisperlivekit.timed_objects import ASRToken
-from whisperlivekit.whisper_streaming_custom.whisper_online import online_factory
-from whisperlivekit.core import TranscriptionEngine
+from whisperlivekit.core import TranscriptionEngine, online_factory
 from whisperlivekit.ffmpeg_manager import FFmpegManager, FFmpegState
-
+from .remove_silences import handle_silences
 # Set up logging once
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -52,7 +51,6 @@ class AudioProcessor:
         self.tokens = []
         self.buffer_transcription = ""
         self.buffer_diarization = ""
-        self.full_transcription = ""
         self.end_buffer = 0
         self.end_attributed_speaker = 0
         self.lock = asyncio.Lock()
@@ -96,13 +94,12 @@ class AudioProcessor:
         """Convert PCM buffer in s16le format to normalized NumPy array."""
         return np.frombuffer(pcm_buffer, dtype=np.int16).astype(np.float32) / 32768.0
 
-    async def update_transcription(self, new_tokens, buffer, end_buffer, full_transcription, sep):
+    async def update_transcription(self, new_tokens, buffer, end_buffer, sep):
         """Thread-safe update of transcription with new data."""
         async with self.lock:
             self.tokens.extend(new_tokens)
             self.buffer_transcription = buffer
             self.end_buffer = end_buffer
-            self.full_transcription = full_transcription
             self.sep = sep
             
     async def update_diarization(self, end_attributed_speaker, buffer_diarization=""):
@@ -129,12 +126,12 @@ class AudioProcessor:
             # Calculate remaining times
             remaining_transcription = 0
             if self.end_buffer > 0:
-                remaining_transcription = max(0, round(current_time - self.beg_loop - self.end_buffer, 2))
+                remaining_transcription = max(0, round(current_time - self.beg_loop - self.end_buffer, 1))
                 
             remaining_diarization = 0
             if self.tokens:
                 latest_end = max(self.end_buffer, self.tokens[-1].end if self.tokens else 0)
-                remaining_diarization = max(0, round(latest_end - self.end_attributed_speaker, 2))
+                remaining_diarization = max(0, round(latest_end - self.end_attributed_speaker, 1))
                 
             return {
                 "tokens": self.tokens.copy(),
@@ -153,7 +150,6 @@ class AudioProcessor:
             self.tokens = []
             self.buffer_transcription = self.buffer_diarization = ""
             self.end_buffer = self.end_attributed_speaker = 0
-            self.full_transcription = self.last_response_content = ""
             self.beg_loop = time()
 
     async def ffmpeg_stdout_reader(self):
@@ -238,7 +234,6 @@ class AudioProcessor:
 
     async def transcription_processor(self):
         """Process audio chunks for transcription."""
-        self.full_transcription = ""
         self.sep = self.online.asr.sep
         cumulative_pcm_duration_stream_time = 0.0
         
@@ -250,7 +245,7 @@ class AudioProcessor:
                     self.transcription_queue.task_done()
                     break
                 
-                if not self.online: # Should not happen if queue is used
+                if not self.online:
                     logger.warning("Transcription processor: self.online not initialized.")
                     self.transcription_queue.task_done()
                     continue
@@ -277,8 +272,6 @@ class AudioProcessor:
 
                 if new_tokens:
                     validated_text = self.sep.join([t.text for t in new_tokens])
-                    self.full_transcription += validated_text
-                    
                     if buffer_text.startswith(validated_text):
                         buffer_text = buffer_text[len(validated_text):].lstrip()
 
@@ -295,7 +288,7 @@ class AudioProcessor:
                 new_end_buffer = max(candidate_end_times)
                 
                 await self.update_transcription(
-                    new_tokens, buffer_text, new_end_buffer, self.full_transcription, self.sep
+                    new_tokens, buffer_text, new_end_buffer, self.sep
                 )
                 self.transcription_queue.task_done()
                 
@@ -344,6 +337,8 @@ class AudioProcessor:
 
     async def results_formatter(self):
         """Format processing results for output."""
+        last_sent_trans = None
+        last_sent_diar = None
         while True:
             try:
                 ffmpeg_state = await self.ffmpeg_manager.get_state()
@@ -381,8 +376,8 @@ class AudioProcessor:
                 lines = []
                 last_end_diarized = 0
                 undiarized_text = []
-                
-                # Process each token
+                current_time = time() - self.beg_loop
+                tokens = handle_silences(tokens, current_time)
                 for token in tokens:
                     speaker = token.speaker
                     
@@ -447,10 +442,19 @@ class AudioProcessor:
                                            ' '.join([f"{line['speaker']} {line['text']}" for line in final_lines_for_response]) + \
                                            f" | {buffer_transcription} | {buffer_diarization}"
                 
-                if current_response_signature != self.last_response_content and \
-                   (final_lines_for_response or buffer_transcription or buffer_diarization or response_status == "no_audio_detected"):
+                trans = state["remaining_time_transcription"]
+                diar = state["remaining_time_diarization"]
+                should_push = (
+                    current_response_signature != self.last_response_content
+                    or last_sent_trans is None
+                    or round(trans, 1) != round(last_sent_trans, 1)
+                    or round(diar, 1) != round(last_sent_diar, 1)
+                )
+                if should_push and (final_lines_for_response or buffer_transcription or buffer_diarization or response_status == "no_audio_detected" or trans > 0 or diar > 0):
                     yield response
                     self.last_response_content = current_response_signature
+                    last_sent_trans = trans
+                    last_sent_diar = diar
                 
                 # Check for termination condition
                 if self.is_stopping:

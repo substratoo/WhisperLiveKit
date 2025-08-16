@@ -15,7 +15,7 @@ Thank you for considering contributing ! We appreciate your time and effort to h
 
 ## Opening Issues
 
-If you encounter a problem with diart or want to suggest an improvement, please follow these guidelines when opening an issue:
+If you encounter a problem with WhisperLiveKit or want to suggest an improvement, please follow these guidelines when opening an issue:
 
 - **Bug Reports:**
   - Clearly describe the error. **Please indicate the parameters you use, especially the model(s)**
@@ -43,4 +43,4 @@ We welcome and appreciate contributions! To ensure a smooth review process, plea
 
 ## Thank You
 
-Your contributions make diart better for everyone. Thank you for your time and dedication!
+Your contributions make WhisperLiveKit better for everyone. Thank you for your time and dedication!

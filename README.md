@@ -13,7 +13,10 @@
 <a href="https://github.com/QuentinFuxa/WhisperLiveKit/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT/Dual Licensed-dark_green"></a>
 </p>
 
-Built on [WhisperStreaming](https://github.com/ufal/whisper_streaming) and [SimulStreaming](https://github.com/ufal/SimulStreaming), WhisperLiveKit provides real-time speech transcription in your browser, with a ready-to-use backend and a simple, customizable frontend. ✨
+
+WhisperLiveKit brings real-time speech transcription directly to your browser, with a ready-to-use backend+server and a simple frontend. ✨
+
+Built on [SimulStreaming](https://github.com/ufal/SimulStreaming) (SOTA 2025) and [WhisperStreaming](https://github.com/ufal/whisper_streaming) (SOTA 2023) for transcription, plus [Streaming Sortformer](https://arxiv.org/abs/2507.18446) (SOTA 2025) and [Diart](https://github.com/juanmc2005/diart) (SOTA 2021) for diarization.
 
 ### This Fork
 Aims to provide some small improvements on the wrapper functionality.
@@ -24,7 +27,7 @@ Aims to provide some small improvements on the wrapper functionality.
 ### Key Features
 
 - **Real-time Transcription** - Locally (or on-prem) convert speech to text instantly as you speak
-- **Speaker Diarization** - Identify different speakers in real-time using [Diart](https://github.com/juanmc2005/diart)
+- **Speaker Diarization** - Identify different speakers in real-time. (⚠️ backend Streaming Sortformer in developement)
 - **Multi-User Support** - Handle multiple users simultaneously with a single backend/server
 - **Automatic Silence Chunking** – Automatically chunks when no audio is detected to limit buffer size
 - **Confidence Validation** – Immediately validate high-confidence tokens for faster inference (WhisperStreaming only)
@@ -223,6 +226,7 @@ WhisperLiveKit offers extensive configuration options:
 | `--static-init-prompt` | Static prompt that doesn't scroll | `None` |
 | `--max-context-tokens` | Maximum context tokens | `None` |
 | `--model-path` | Direct path to .pt model file. Download it if not found | `./base.pt` |
+| `--preloaded-model-count` | Optional. Number of models to preload in memory to speed up loading (set up to the expected number of concurrent users) | `1` |
 
 ## 🔧 How It Works
 

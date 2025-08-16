@@ -15,7 +15,7 @@ from .beam import BeamPyTorchInference
 from .eow_detection import fire_at_boundary, load_cif
 import os
 
-from token_buffer import TokenBuffer
+from .token_buffer import TokenBuffer
 
 import numpy as np
 from .generation_progress import *
@@ -33,11 +33,14 @@ import wave
 # - prompt -- static vs. non-static
 # - context
 class PaddedAlignAttWhisper:
-    def __init__(self, cfg: AlignAttConfig) -> None:
+    def __init__(self, cfg: AlignAttConfig, loaded_model=None) -> None:
         self.log_segments = 0
         model_name = os.path.basename(cfg.model_path).replace(".pt", "")
         model_path = os.path.dirname(os.path.abspath(cfg.model_path))
-        self.model = load_model(name=model_name, download_root=model_path)
+        if loaded_model:
+            self.model = loaded_model
+        else:
+            self.model = load_model(name=model_name, download_root=model_path)
 
         logger.info(f"Model dimensions: {self.model.dims}")
 
